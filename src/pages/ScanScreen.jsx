@@ -29,35 +29,31 @@ export default function ScanScreen() {
 
   // Detect mobile
   useEffect(() => {
-    const checkMobile = () => {
-      const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      setIsMobile(mobile);
-    };
-    checkMobile();
+    const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    setIsMobile(mobile);
   }, []);
 
   // Haptic feedback
   const triggerHaptic = () => {
-    if (navigator.vibrate) {
-      navigator.vibrate(50);
-    }
+    if (navigator.vibrate) navigator.vibrate(50);
   };
 
-  // Open file picker (camera or gallery)
+  // Open file picker
   const openFilePicker = (useCamera = false) => {
     triggerHaptic();
+
     fileInputRef.current?.setAttribute(
       "capture",
       useCamera ? "environment" : ""
     );
+
     fileInputRef.current?.click();
   };
 
-  // Handle file selection (camera or gallery)
+  // Handle file selection
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     processImage(file);
   };
 
@@ -96,15 +92,12 @@ export default function ScanScreen() {
     }
   };
 
-  // Drag & Drop Handlers
+  // Drag & drop handlers
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
+    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
+    if (e.type === "dragleave") setDragActive(false);
   };
 
   const handleDrop = (e) => {
@@ -113,9 +106,7 @@ export default function ScanScreen() {
     setDragActive(false);
 
     const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith("image/")) {
-      processImage(file);
-    }
+    if (file && file.type.startsWith("image/")) processImage(file);
   };
 
   const handleVerify = async () => {
@@ -149,13 +140,13 @@ export default function ScanScreen() {
 
   return (
     <>
-      {/* Hidden File Input */}
+      {/* Hidden but not display:none */}
       <input
         type="file"
         accept="image/*"
         ref={fileInputRef}
         onChange={handleFileChange}
-        className="hidden"
+        className="w-0 h-0 opacity-0 absolute"
         aria-label="Upload drug image"
       />
 
@@ -180,7 +171,7 @@ export default function ScanScreen() {
           {/* Progress Card */}
           {isLoading && !showModal && (
             <div className="my-8 p-6 bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl border border-white/50">
-              <div className="flex flex-col items-center justify-center h-full min-h-24">
+              <div className="flex flex-col items-center justify-center min-h-24">
                 <Loader2 className="w-8 h-8 text-brand-blue animate-spin" />
                 <p className="font-medium text-brand-blue text-center mt-2">
                   {scanProgress}
@@ -189,7 +180,6 @@ export default function ScanScreen() {
             </div>
           )}
 
-          {/* Error Message */}
           {apiError && (
             <div className="my-4 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm animate-shake">
               {apiError}
@@ -197,7 +187,7 @@ export default function ScanScreen() {
           )}
         </div>
 
-        {/* Upload Zone (Desktop + Mobile Fallback) */}
+        {/* Upload Zone */}
         <div
           ref={dropZoneRef}
           onDragEnter={handleDrag}
@@ -208,71 +198,54 @@ export default function ScanScreen() {
             dragActive ? "scale-105" : ""
           }`}
         >
-          {/* Mobile: Dual Buttons */}
           {isMobile ? (
             <div className="flex justify-center gap-6">
-              {/* Camera Button */}
               <button
                 onClick={() => openFilePicker(true)}
                 disabled={isLoading}
-                className={`
-                  relative group w-24 h-24 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95
-                  ${
-                    isLoading
-                      ? "bg-gray-400"
-                      : "bg-gradient-to-br from-brand-blue to-purple-600"
-                  }
-                `}
-                aria-label="Scan with camera"
+                className={`relative group w-24 h-24 rounded-full shadow-2xl transition-all ${
+                  isLoading
+                    ? "bg-gray-400"
+                    : "bg-gradient-to-br from-brand-blue to-purple-600"
+                }`}
               >
-                <div className="absolute inset-0 rounded-full bg-white/20 group-hover:bg-white/30 transition"></div>
+                <div className="absolute inset-0 rounded-full bg-white/20 group-hover:bg-white/30"></div>
                 <Camera className="w-12 h-12 text-white relative z-10" />
                 <div className="absolute inset-0 rounded-full animate-ping bg-white/30"></div>
               </button>
 
-              {/* Gallery Button */}
               <button
                 onClick={() => openFilePicker(false)}
                 disabled={isLoading}
-                className={`
-                  relative group w-24 h-24 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95
-                  ${
-                    isLoading
-                      ? "bg-gray-400"
-                      : "bg-gradient-to-br from-green-500 to-emerald-600"
-                  }
-                `}
-                aria-label="Choose from gallery"
+                className={`relative group w-24 h-24 rounded-full shadow-2xl transition-all ${
+                  isLoading
+                    ? "bg-gray-400"
+                    : "bg-gradient-to-br from-green-500 to-emerald-600"
+                }`}
               >
-                <div className="absolute inset-0 rounded-full bg-white/20 group-hover:bg-white/30 transition"></div>
+                <div className="absolute inset-0 rounded-full bg-white/20 group-hover:bg-white/30"></div>
                 <ImageIcon className="w-12 h-12 text-white relative z-10" />
                 <div className="absolute inset-0 rounded-full animate-ping bg-white/30"></div>
               </button>
             </div>
           ) : (
-            /* Desktop: Upload + Drag & Drop */
-            <div className="relative">
+            <div className="relative flex justify-center">
               <button
                 onClick={() => openFilePicker(false)}
                 disabled={isLoading}
-                className={`
-                  relative group w-28 h-28 mx-auto rounded-full shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95
-                  ${
-                    isLoading
-                      ? "bg-gray-400"
-                      : "bg-gradient-to-br from-brand-blue to-purple-600"
-                  }
-                `}
-                aria-label="Upload image"
+                className={`relative group w-28 h-28 rounded-full shadow-2xl transition-all ${
+                  isLoading
+                    ? "bg-gray-400"
+                    : "bg-gradient-to-br from-brand-blue to-purple-600"
+                }`}
               >
-                <div className="absolute inset-0 rounded-full bg-white/20 group-hover:bg-white/30 transition"></div>
+                <div className="absolute inset-0 rounded-full bg-white/20 group-hover:bg-white/30"></div>
                 <Upload className="w-14 h-14 text-white relative z-10" />
                 <div className="absolute inset-0 rounded-full animate-ping bg-white/30"></div>
               </button>
 
-              {/* Drag & Drop Overlay */}
               {dragActive && (
-                <div className="absolute inset-0 -m-8 bg-brand-blue/20 backdrop-blur-sm rounded-3xl border-4 border-dashed border-brand-blue flex items-center justify-center animate-pulse">
+                <div className="absolute inset-0 bg-brand-blue/20 backdrop-blur-sm rounded-3xl border-4 border-dashed border-brand-blue flex items-center justify-center animate-pulse">
                   <p className="text-brand-blue font-bold text-lg">
                     Drop Image Here
                   </p>
@@ -282,15 +255,12 @@ export default function ScanScreen() {
           )}
         </div>
 
-        {/* Instructions */}
         <div className="mt-6 text-center z-10">
           {isMobile ? (
-            <>
-              <p className="text-sm font-medium text-gray-600">
-                Tap <Camera className="inline w-4 h-4" /> to scan or{" "}
-                <ImageIcon className="inline w-4 h-4" /> to pick from gallery
-              </p>
-            </>
+            <p className="text-sm font-medium text-gray-600">
+              Tap <Camera className="inline w-4 h-4" /> to scan or{" "}
+              <ImageIcon className="inline w-4 h-4" /> to pick from gallery
+            </p>
           ) : (
             <p className="text-sm font-medium text-gray-600 max-w-xs mx-auto">
               Click to upload or{" "}
@@ -303,16 +273,15 @@ export default function ScanScreen() {
         {/* Confirm Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-6 animate-fade-in">
-            <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl transform transition-all animate-slide-up">
+            <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-slide-up">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-gray-900 flex items-center space-x-2">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-brand-blue" />
-                  <span>Code Detected!</span>
+                  Code Detected!
                 </h3>
                 <button
                   onClick={() => setShowModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition"
-                  aria-label="Close modal"
+                  className="text-gray-400 hover:text-gray-600"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -330,22 +299,21 @@ export default function ScanScreen() {
                   className="w-full text-center text-2xl font-mono font-bold text-brand-blue bg-transparent outline-none"
                   autoFocus
                   spellCheck={false}
-                  aria-label="Edit detected code"
                 />
               </div>
 
               <button
                 onClick={handleVerify}
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-brand-blue to-purple-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center space-x-2 hover:shadow-xl transition disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-brand-blue to-purple-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:shadow-xl"
               >
                 <CheckCircle className="w-6 h-6" />
-                <span>Verify Now</span>
+                Verify Now
               </button>
 
               <button
                 onClick={() => setShowModal(false)}
-                className="w-full mt-3 text-gray-600 py-3 rounded-2xl font-medium hover:bg-gray-100 transition"
+                className="w-full mt-3 text-gray-600 py-3 rounded-2xl font-medium hover:bg-gray-100"
               >
                 Cancel
               </button>
