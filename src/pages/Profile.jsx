@@ -1,4 +1,5 @@
 // src/pages/Profile.jsx
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -19,6 +20,13 @@ export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("Raji Abdulfatai Ridwan");
 
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    if (navigator.vibrate) navigator.vibrate(50);
+
+    // Navigate to Onboarding
+    navigate("/", { replace: true });
+  };
   // DUMP DATA — NO API
   const user = {
     email: "raji@example.com",
@@ -140,14 +148,17 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Logout */}
+      {/* Logout Button */}
       <div className="px-6 mt-6">
-        <button className="w-full bg-brand-red text-white py-4 rounded-2xl font-bold flex items-center justify-center space-x-2 hover:bg-red-700 transition">
+        <button
+          onClick={handleLogout}
+          className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-bold flex items-center justify-center space-x-2 transition-all active:scale-95 shadow-lg"
+          aria-label="Logout and return to onboarding"
+        >
           <LogOut className="w-5 h-5" />
           <span>Logout</span>
         </button>
       </div>
-
       <BottomNav />
     </div>
   );

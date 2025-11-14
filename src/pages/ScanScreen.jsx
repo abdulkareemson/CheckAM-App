@@ -1,6 +1,6 @@
 // src/pages/ScanScreen.jsx
-import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
 import {
   Camera,
   Upload,
